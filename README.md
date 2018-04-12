@@ -16,6 +16,9 @@ Sunset over Earth and we are heading to moon encounter
 
 ![Alt text](screenshots/Luna_Start.jpg?raw=true "Sunrise")
 
+You should end as it is on next picture...
+![Alt text](screenshots/LunaA1_trajectory.jpg?raw=true "trajectory")
+
 Getting closer to moon
 ![Alt text](screenshots/Luna_A1.jpg?raw=true "Getting closer to moon")
 ..and closer..
