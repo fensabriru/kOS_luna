@@ -16,19 +16,6 @@ if ship:status() = "prelaunch"
 }
 if apoapsis < 500000 and ship:body = earth
 {
-	//switch to 0.
-	//run once rendezvous.
-	//until false
-	//{
-	//	print "Angle: " + GetCurrentTgtAngle(moon).
-	//	if GetCurrentTgtAngle(moon) < 115 and GetCurrentTgtAngle(moon) > 112
-	//	{	
-	//		set ship:control:neutralize to true.
-	//		break.
-	//	}
-	//	wait 1.
-	//}
-	//SET WARPMODE TO "PHYSICS".
 	SET nd TO NEXTNODE.
 	SET WARPMODE TO "RAILS".
 	SET WARP TO 2.	
@@ -37,7 +24,6 @@ if apoapsis < 500000 and ship:body = earth
 	set ship:control:neutralize to true.
 	rcs on.
 	SET np TO nd:DELTAV:DIRECTION.
-	//LOCK STEERING TO nd:DELTAV:DIRECTION.
 	LOCK STEERING TO LOOKDIRUP(nd:DELTAV, SHIP:FACING:TOPVECTOR).
 	WAIT UNTIL ABS(np:PITCH - FACING:PITCH) < 1 AND ABS(np:YAW - FACING:YAW) < 1.
 	//lock steering to prograde.
