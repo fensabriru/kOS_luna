@@ -17,6 +17,7 @@ if ship:status() = "prelaunch"
 if apoapsis < 500000 and ship:body = earth
 {
 	SET WARP TO 0.
+	Hohmann().
 	SET nd TO NEXTNODE.
 	//Next line is important, this is the only way how control RCS only ship. If you know better way please advice :) 
 	set ship:control:neutralize to true.
