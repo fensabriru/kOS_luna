@@ -139,4 +139,3 @@ until OrbitAchieved(dsd_alt)
 	}
 }
 ShutdownEngines().
-Hohmann().
