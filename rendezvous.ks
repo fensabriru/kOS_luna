@@ -76,7 +76,7 @@ function GetLaunchGuidanceVector
 function GetLaunchHeading
 {
 	parameter tgt_normal.
-	if defined desiredInc {
+	if defined desiredInc and desiredInc > ROUND(ship:latitude,0) {
 		local inc is desiredInc.
 		local V_orb is sqrt( body:mu / ( ship:altitude + body:radius)).
 		local az_orb is arcsin ( cos(inc) / cos(ship:latitude)).
