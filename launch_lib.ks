@@ -1,3 +1,56 @@
+function time_to_node {
+    SET w TO ship:orbit:period/360.
+    SET shiptolan TO 360 - (orbit:argumentofperiapsis + orbit:trueanomaly).
+    if shiptolan < 0 {
+        set shiptolan to shiptolan + 360.
+    }
+    return shiptolan * w.
+}
+function dV_normal {
+    SET v TO velocityat(ship,time:seconds + time_to_node()):orbit:mag.
+    return 2 * v * sin(delta_i/2).
+}
+function dV_prograde {
+    SET v TO velocityat(ship,time:seconds + time_to_node()):orbit:mag.
+    local v_prograde is v/cos(delta_i).
+    return v - v_prograde.
+}
+function changeInc{
+	declare parameter desired_i.
+	set delta_i to desired_i - orbit:inclination.
+	set myNode to node(time:seconds + time_to_node(),0,dV_normal(),dV_prograde).
+	add myNode.
+}
+function speedforcirorb{
+	parameter altitude.
+	return sqrt((constant:g*body:mass)/(altitude+body:radius)).
+}
+function changeapo{
+	parameter tgtapo.
+	set newsma to (periapsis+(body:radius*2)+tgtapo)/2.
+	set dv to instantvelatalt(periapsis,newsma)-instantvelatalt(periapsis,0).
+	print dv.
+	set myNode to node(time:seconds+eta:periapsis,0,0,dv).
+	add myNode.
+}
+function changeper{
+	parameter tgtper.
+	set newsma to (tgtper+(body:radius*2)+apoapsis)/2.
+	set dv to instantvelatalt(apoapsis,newsma)-instantvelatalt(apoapsis,0).
+	set myNode to node(time:seconds+eta:apoapsis,0,0,dv).
+	add myNode.
+}
+function circularize{
+	parameter where.
+	if where:contains("periapsis") {
+		set myNode to node(time:seconds+eta:periapsis,0,0,speedforcirorb(ship:orbit:periapsis)-instantvelatalt(ship:orbit:periapsis,orbit:semimajoraxis)).
+		add myNode.
+	}
+	else if where:contains("apoapsis") {
+		set myNode to node(time:seconds+eta:apoapsis,0,0,speedforcirorb(ship:orbit:apoapsis)-instantvelatalt(ship:orbit:apoapsis,orbit:semimajoraxis)).
+		add myNode.
+	}
+}
 function instantVelatAlt{
 	parameter altitude.
 	parameter sma.
@@ -5,8 +58,7 @@ function instantVelatAlt{
 	local v is sqrt(Body:MU*((2/(altitude+body:radius))-(1/sma))).
 	return v.
 }
-//creates Hohmann node
-FUNCTION Hohmann {
+function Hohmann {
 	set newsma to (periapsis+(body:radius*2)+target:altitude)/2.
 	set temperiod to 2*constant:pi*sqrt((newsma*newsma*newsma)/body:mu).
 	set halfp to temperiod/2.
@@ -22,7 +74,7 @@ FUNCTION Hohmann {
 	}
 	set dv to instantVelatAlt((positionat(ship,tempt)-ship:body:position):mag-body:radius,newsma)-instantVelatAlt((positionat(ship,tempt)-ship:body:position):mag-body:radius,0).
 	set myNode to node(tempt,0,0,dv).
-	add mynode.
+	add myNode.
 }
 //Returns what our yaw angle should be to point our ship
 //at an arbitrary steering vector
@@ -224,4 +276,115 @@ function ShutdownEngines
 			eng:shutdown().
 		}
 	}
+}
+function report_sat{
+	IF DEFINED old_peri {
+		SET cls TO 0.
+	} ELSE {
+		SET old_peri TO 22.
+		SET cls TO 1.
+	}
+	IF DEFINED old_apo {
+		SET cls TO 0.
+	} ELSE {
+		SET cls TO 1.
+		SET old_apo TO 11.
+	}
+	IF APOAPSIS < 200000 {
+		SET line_apoapsis to 11.
+	} ELSE IF APOAPSIS < 500000 {
+		SET line_apoapsis to 10.
+	} ELSE IF APOAPSIS < 750000 {
+		SET line_apoapsis to 9.
+	} ELSE IF APOAPSIS < 1000000 {
+		SET line_apoapsis to 8.
+	} ELSE IF APOAPSIS < 2000000 {
+		SET line_apoapsis to 7.
+	} ELSE IF APOAPSIS < 5000000 {
+		SET line_apoapsis to 6.
+	} ELSE IF APOAPSIS < 10000000 {
+		SET line_apoapsis to 5.
+	} ELSE IF APOAPSIS < 15000000 {
+		SET line_apoapsis to 4.
+	} ELSE IF APOAPSIS < 20000000 {
+		SET line_apoapsis to 3.
+	} ELSE IF APOAPSIS < 30000000 {
+		SET line_apoapsis to 2.
+	} ELSE {
+		SET line_apoapsis to 1.
+	}
+	IF PERIAPSIS < 200000 {
+		SET line_periapsis to 22.
+	} ELSE IF PERIAPSIS < 500000 {
+		SET line_periapsis to 23.
+	} ELSE IF PERIAPSIS < 750000 {
+		SET line_periapsis to 24.
+	} ELSE IF PERIAPSIS < 1000000 {
+		SET line_periapsis to 25.
+	} ELSE IF PERIAPSIS < 2000000 {
+		SET line_periapsis to 26.
+	} ELSE IF PERIAPSIS < 5000000 {
+		SET line_periapsis to 27.
+	} ELSE IF PERIAPSIS < 10000000 {
+		SET line_periapsis to 28.
+	} ELSE IF PERIAPSIS < 15000000 {
+		SET line_periapsis to 29.
+	} ELSE IF PERIAPSIS < 20000000 {
+		SET line_periapsis to 30.
+	} ELSE IF PERIAPSIS < 30000000 {
+		SET line_periapsis to 31.
+	} ELSE {
+		SET line_periapsis to 32.
+	} 
+	IF old_peri <> line_periapsis {
+		SET old_peri TO line_periapsis.
+		SET cls TO 1.
+	} ELSE IF old_apo <> line_apoapsis {
+		SET old_apo TO line_apoapsis.
+		SET cls TO 1.
+	}
+	IF cls = 1 {clearscreen.}		
+	PRINT "              APOAPSIS _____ " + ROUND(SHIP:APOAPSIS,0) at (0,line_apoapsis).
+	PRINT "                       _____			" at (0,12).
+	PRINT "                   ,-:` \;',`'-,		" at (0,13). 
+	PRINT "                 .'-;_,;  ':-;_,'.		" at (0,14).
+	PRINT "                /;   '/    ,  _`.-\	" at (0,15).
+	PRINT "               | '`. (`     /` ` \`|	" at (0,16).
+	PRINT "               |:.  `\`-.   \_   / |	" at (0,17).
+	PRINT "               |     (   `,  .`\ ;'|	" at (0,18).
+	PRINT "                \     | .'     `-'/	" at (0,19).
+	PRINT "                 `.   ;/        .'		" at (0,20).
+	PRINT "                   `'-._____.			" at (0,21).
+	PRINT "              PERIAPSIS ____ " + ROUND(SHIP:PERIAPSIS,0) at (0,line_periapsis).
+	PRINT "            ACTUAL  INCLINATION - " + ROUND(ORBIT:INCLINATION,0) at (0,34).
+	PRINT "            DESIRED INCLINATION - " + desiredInc at (0,35).
+}
+function sateliteDeployed{
+	clearscreen.
+	PRINT "              *********************".
+	PRINT "              * SATELITE DEPLOYED *".
+	PRINT "              *********************".
+	PRINT "              APOAPSIS  :" + ROUND(SHIP:APOAPSIS,0).
+	PRINT "              PERIAPSIS :" + ROUND(SHIP:PERIAPSIS,0).
+	PRINT "              INCLINATION -" + ROUND(ORBIT:INCLINATION,0).
+	PRINT " .       .                   .       .      .     .      .".
+	PRINT ".    .         .    .            .     ______".
+	PRINT "        .             .               ////////".
+	PRINT "      .    .   ________   .  .      /////////     .    .".
+	PRINT " .            |.____.  /\        ./////////    .".
+	PRINT "            .//      \/  |\     /////////".
+	PRINT "     .    .//          \ |  \ /////////       .     .   .".
+	PRINT "          ||.    .    .| |  ///////// .     .".
+	PRINT ".         ||           | |//`,/////                .".
+	PRINT "   .       \\        ./ //  /  \/   .".
+	PRINT "             \\.___./ //\` '   ,_\     .     .".
+	PRINT ".           .     \ //////\ , /   \                 .    .".
+	PRINT "             .    ///////// \|  '  |    .".
+	PRINT "     .          ///////// .   \ _ /          .".
+	PRINT "              /////////                              .".
+	PRINT "       .   ./////////     .     .".
+	PRINT "           --------   .                  ..             .".
+	PRINT "        .        .         .                       .".
+	PRINT "              ________________________".
+	PRINT "__------------                        -------------_________".
 }
