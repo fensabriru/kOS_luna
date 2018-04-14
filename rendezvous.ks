@@ -76,19 +76,20 @@ function GetLaunchGuidanceVector
 function GetLaunchHeading
 {
 	parameter tgt_normal.
-	if desiredInc defined{
+	if defined desiredInc {
 		local inc is desiredInc.
-			local V_orb is sqrt( body:mu / ( ship:altitude + body:radius)).
-			local az_orb is arcsin ( cos(inc) / cos(ship:latitude)).
-			if (inc < 0) {
-				set az_orb to 180 - az_orb.
-			}
+		local V_orb is sqrt( body:mu / ( ship:altitude + body:radius)).
+		local az_orb is arcsin ( cos(inc) / cos(ship:latitude)).
+		if (inc < 0) {
+			set az_orb to 180 - az_orb.
+		}
 		local V_star is heading(az_orb, 0)*v(0, 0, V_orb).
 		local V_ship_h is ship:velocity:orbit - vdot(ship:velocity:orbit, up:vector:normalized)*up:vector:normalized.
 		local V_corr is V_star - V_ship_h.
 		local vel_n is vdot(V_corr, ship:north:vector).
 		local vel_e is vdot(V_corr, heading(90,0):vector).
 		local angle is arctan2(vel_e, vel_n).
+		return angle.	
 	} else {
 		local v1 is GetLaunchGuidanceVector(tgt_normal).
 		local angle is vang(v1, north:vector).
@@ -96,8 +97,9 @@ function GetLaunchHeading
 		{
 			set angle to 360 - angle.
 		}
+		return angle.
 	}
-	return angle.
+	
 }
 
 function GetCurrentTgtAngle
