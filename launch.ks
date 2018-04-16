@@ -137,5 +137,10 @@ until OrbitAchieved(dsd_alt)
 	{
 		NextStage().
 	}
+		for booster in SHIP:PARTSTAGGED("booster") {
+ 		if booster:HASSUFFIX("FLAMEOUT") and booster:FLAMEOUT {
+			STAGE.
+		}
+	}
 }
 ShutdownEngines().
