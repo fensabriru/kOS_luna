@@ -1,4 +1,4 @@
-parameter dsd_alt, pitchover_angle, normal_vector is north:vector.
+parameter dsd_alt, pitchover_angle, normal_vector is north:vector, burnout is 0, apogee is 0.
 
 switch to 0. 
 
@@ -6,6 +6,8 @@ run once attitude.
 run once pid.
 run once rendezvous.
 run once launch_lib.
+
+DECLARE GLOBAL destorb TO dsd_alt.
 
 function RollProgram
 {
@@ -143,4 +145,20 @@ until OrbitAchieved(dsd_alt)
 		}
 	}
 }
+set SHIP:CONTROL:NEUTRALIZE to TRUE.
+if apogee > 0 {
+	set loop to 0.
+	print "Raising Apoapsis to " + apogee + "m".
+	until loop = 1 {
+		if (apogee < apoapsis) {break.}
+		lock steering to SHIP:PROGRADE.
+	} 
+}		
+else if burnout = 1 {
+	print "executing burn out".
+	until maxthrust = 0 {
+		lock steering to SHIP:PROGRADE.
+	} 
+}
 ShutdownEngines().
+set SHIP:CONTROL:NEUTRALIZE to TRUE.

@@ -122,7 +122,8 @@ function GetPitchError
 //The ratio of our apoapsis / desired orbital altitude to 1
 function pitch_angle_error_boost
 {
-	return apoapsis / 200000.
+	//return apoapsis / 200000.
+	return apoapsis / destorb.
 }
 
 //And after we reach our intended altitude we kill our vertical velocity
@@ -157,11 +158,11 @@ function LaunchCountdown
 	until x = 0
 	{
 		hudtext("Liftoff in T-" + x + " seconds", 1, 2, 25, green, true).
-		if x = 3
+		if x = 2
 		{
 			for eng in englist
 			{
-				eng:activate().
+					eng:activate().
 			}
 		}
 		wait 1.
