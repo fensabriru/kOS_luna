@@ -25,3 +25,6 @@ Getting closer to moon
 ![Alt text](screenshots/Luna_A1_2.jpg?raw=true "Getting closer to moon")
 Impact Imminent
 ![Alt text](screenshots/Luna_A1_4.jpg?raw=true "Impact Imminent")
+
+
+Launch script has been updated to support launch to specific orbits (inclination, apoapsis, periapsis, launch to selected plane and ability to burn all fuel if needed). I uploaded two launch example scripts : orbit.ks and orbit_rande.ks.
